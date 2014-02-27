@@ -1,0 +1,133 @@
+#!/bin/sh
+#	Author: 	Simon Arjuna Erat
+#	License:	GPL3
+#	Contact:	erat.simon@gmail.com
+#	Changed:	2014.02.25
+#	Created:	2014.02.27
+#
+#	Variable defaults
+#
+	source tui
+	script_version=0.1
+	ME="$(basename $0)"
+	DIR="/usr/share/$ME"
+	OLD="$(pwd)"
+	[ ! -z ${TITLE[@]} ] && unset TITLE[@]
+	help_text="\r$ME ($script_version)
+		\r$TITLE
+		\rUsage: $ME [options] [arguments]
+		\rWhere options are:
+		\r\t-h\tThis screen
+		\r\t-o\tOther stuff
+		\r"
+	ARGS=(${@})
+	ARGS_COUNT=$#
+	[ -z $WIDTH ] && WIDTH=$(tput cols)
+	LEN=$[ 2 * ${#BORDER_LEFT} ]
+	CONFIG="$HOME/.config/motd-sutra.conf"
+	
+#
+#	Empty configuration values,
+#	check for $CONFIG and retrieve values if exist
+#	create and define default configuration otherwise
+#
+	myLanguage=""
+	myBook=""
+	if [  -f "$CONFIG" ]
+	then	source "$CONFIG"
+	else	printf "# Configurationfile from $ME ($script_version) - $TITLE
+# Created in the year $(date +'%Y within %B on %d @ %H:%M')
+myLanguage=\"German\"
+myBook=\"\"" > $CONFIG
+		source "$CONFIG"
+	fi
+#
+#	Load array file with title caption
+#
+	LANGUAGE="$DIR/lang/${myLanguage,,}" ; 	source "$LANGUAGE"
+	BOOKS_DIR="$DIR/lang/$myLanguage"
+	myTitle="${TITLE[$myLanguage]}"
+	cd "$BOOKS_DIR" ; BOOKS_LIST="$(ls -ld *|awk '{print $9}')"
+#
+#	Variable handling
+#
+	#
+	#	Will be done later :: TODO :: TODO
+	#
+#
+#	Functions
+#
+	rnd() { # MAX [ MIN=0 ]
+	# Returns a random number upto MAX, 
+	# or if provided, between MIN and MAX.
+	#
+	#	Arguments
+	#
+		[ -z $1 ] && printf "\rEE$0::Must provide MAX value!\n" && exit 1
+		count=0
+		min=0
+		task=todo
+		rnd=$RANDOM
+		[ ! -z $2 ] && 
+			(( if [ $1 -gt $2 ] ;then min=$2;max=$1;else min=$1;max=$2;fi )) || \
+			max=$1
+	#
+	#	Action
+	#
+		while [ $rnd -gt $max ]  #&& (( [ ! -z $2 ] && [ $min -gt $rnd ] ))
+		do	rnd=$(($RANDOM*$max/$RANDOM))
+		done
+		printf $rnd
+	}
+	GetRndfromFolder() { # DIRECTORY
+	# Change to DIRECTORY (& back when done),
+	# returns a random item from its content (file-,foldername)
+		unset ALL[@]
+		old="$(pwd)"
+		if [ -d "$1" ] 
+		then	cd "$1"
+		else	tui-status 1 "${lblNoPath[$myLanguage]} ($1)";exit 1
+		fi
+		ALL=( * )
+		TOTAL=$[ ${#ALL[@]} ]
+		STR="${ALL[$(rnd $[ $TOTAL - 1 ])]}"
+		printf "$STR"
+		cd $old
+	}
+#
+#	Verify we have a book to look for sutra
+#
+	if [ -z $myBook ]
+	then	if [ "$(printf $BOOKS_LIST|wc|awk '{print $2}')" -eq 1 ]
+		then	TB="$(printf $BOOKS_LIST)"
+			sed s,myBook=\"\",myBook=\"$TB\",g -i $CONFIG
+			tui-status $? "${lblChooseBookOne[$myLanguage]}"	&& \
+				source "$CONFIG" || exit 1
+		else	tui-echo "${lblChooseBook[$myLanguage]}"
+			select TB in $BOOKS_LIST;do break;done
+			sed s,myBook=\"\",myBook=\"$TB\",g -i $CONFIG
+			tui-status $? "$TB ${lblChooseBookDone[$myLanguage]}"	&& \
+				source "$CONFIG" || exit 1
+		fi
+	fi
+#
+#	Get a random chapter from within the book
+#	and then choose a random sutra from that chapter-dir
+#
+	CHAPTER=$(GetRndfromFolder "$BOOKS_DIR/$myBook")
+	SUTRA=$(GetRndfromFolder "$BOOKS_DIR/$myBook/$CHAPTER")
+#
+#	Display to user : Header
+#
+	tui-header	"$myTitle : $myBook" \
+		 	"$ME ($script_version), ${LangRevlbl[$myLanguage]}: ${LangRevval[$myLangauge]}"
+	tui-title "$SUTRA) $CHAPTER"
+#
+#	Display to user : Actual Sutra
+#
+	cat "$BOOKS_DIR/$myBook/$CHAPTER/$SUTRA"
+	printf "\n"
+#
+#	Return to old/origin location
+#
+	cd $Old

@@ -1,0 +1,8 @@
+TITLE[German]="Vedische Schriften"
+LangRevlbl[German]="Überarbeitung"
+LangRevval[German]=1
+LangRevComment[German]="TODO alle Verse abschreiben"
+lblChooseBookOne[German]="Es wurde automatisch $(ls $DIR/lang/German) ausgewählt."
+lblChooseBook[German]="Bitte wähle ein Buch aus dem die Sutra's angezeigt werden sollen."
+lblChooseBookDone[German]="wurde ausgewählt."
+lblNoPath[German]="Pfad existiert nicht!"
