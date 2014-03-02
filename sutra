@@ -18,7 +18,8 @@
 		\rUsage: $ME [options] [arguments]
 		\rWhere options are:
 		\r\t-h\tThis screen
-		\r\t-\tOther stuff
+		\r\t-a|about\tPrints information about all installed language packes
+		\r\t\tand therefore of all installed books and their chapters & verses.
 		\r"
 	ARGS=(${@})
 	ARGS_COUNT=$#
@@ -65,7 +66,6 @@ myBook=\"\"" > $CONFIG
 	do 	case $name in
 		a|about)
 			tui-header "$ME ($script_version)" "written by: Simon Arjuna Erat (sea)"
-			tui-title "Installed Languages & Books"
 			for lang in $DIR/lang/[A-Z]*;do
 				books=""
 				this="$(basename $lang)"
@@ -73,7 +73,9 @@ myBook=\"\"" > $CONFIG
 				this="${this:0:1}"
 				this_cap="${this^^}"
 				if [ "$this" = "$this_cap" ]
-				then	tui-echo "Language:" "$LANG"
+				then	tui-title "${TITLE[$LANG]}"
+					tui-title "${lblAboutTitle[$LANG]}" #"Installed Languages & Books"
+					tui-echo "${lblLanguage[$LANG]}:" "$LANG"
 					source "${lang,,}"
 					tui-echo "${LangRevlbl[$LANG]}:" 	"${LangRevval[$LANG]}"
 					tui-echo "Authors:" 			"${LangAuthors[@]}" 
@@ -81,12 +83,12 @@ myBook=\"\"" > $CONFIG
 					
 					for b in $(ls "$lang");do 
 						books+=" $b"
-						tui-title "${TITLE[$LANG]}: $b"
+						tui-title "${lblTitle[$LANG]}: $b"
 						CHAPTERS=( "$(ls $DIR/lang/$LANG/$b)" ) #>> /dev/stderr
 						for CHAPTER in "${CHAPTERS[@]}" ;do
 							this_dir="$DIR/lang/$LANG/${b}/${CHAPTER}"
 							chaps=$(cd "${this_dir}";var=( $(ls) );printf "${var[*]}")
-							tui-echo "${CHAPTER}" "$chaps" 
+							tui-echo "${lblChapter[$LANG]}: ${CHAPTER}" "$chaps"  # ${lblVers[$LANG]}: 
 						done
 					done
 					

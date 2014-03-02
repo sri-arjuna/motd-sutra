@@ -16,11 +16,12 @@
 #
 	TITLE[German]="Vedische Schriften"
 #
-#	Author Information
-
+#	Words
 #
-	LangRevlbl[German]="Überarbeitung"
-	LangRevCommentlbl[German]="Kommentar:"
+	lblChapter[German]="Kapitel"
+	lblVers[German]="Vers"
+	lblTitle[German]="Titel"
+	lblLanguage[German]="Sprache"
 #
 #	'Interface':	Book
 #
@@ -31,3 +32,12 @@
 #	'Interface':	Path
 #
 	lblNoPath[German]="Pfad existiert nicht!"
+#
+#	'Interface':	About
+#
+	lblAboutTitle[German]="Installerte Sprachen und Bücher"
+#
+#	Author Information
+#
+	LangRevlbl[German]="Überarbeitung"
+	LangRevCommentlbl[German]="Kommentar:"
