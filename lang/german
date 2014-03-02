@@ -1,8 +1,33 @@
-TITLE[German]="Vedische Schriften"
-LangRevlbl[German]="Überarbeitung"
-LangRevval[German]=1
-LangRevComment[German]="TODO alle Verse abschreiben"
-lblChooseBookOne[German]="Es wurde automatisch $(ls $DIR/lang/German) ausgewählt."
-lblChooseBook[German]="Bitte wähle ein Buch aus dem die Sutra's angezeigt werden sollen."
-lblChooseBookDone[German]="wurde ausgewählt."
-lblNoPath[German]="Pfad existiert nicht!"
+# motd-sutra: Deutsche Ausgabe
+#
+# Append, Edit only these values here:
+#	* Modify the comment value for translation-revision comments
+	LangRevval[German]=" 1 "
+	LangRevComment[German]="alle Verse (kaptiel 1) abschreiben"
+#	* If fyou helped writing content,
+#	     append yourself after a coma: ','
+	LangAuthors[German]="Simon Arjuna Erat (sea)"
+#
+#
+#	Dont modify after here: 
+# -------------------------------------
+#
+#	Translated Title
+#
+	TITLE[German]="Vedische Schriften"
+#
+#	Author Information
+
+#
+	LangRevlbl[German]="Überarbeitung"
+	LangRevCommentlbl[German]="Kommentar:"
+#
+#	'Interface':	Book
+#
+	lblChooseBookOne[German]="Es wurde automatisch $(ls $DIR/lang/German) ausgewählt."
+	lblChooseBook[German]="Bitte wähle ein Buch aus dem die Sutra's angezeigt werden sollen."
+	lblChooseBookDone[German]="wurde ausgewählt."
+#
+#	'Interface':	Path
+#
+	lblNoPath[German]="Pfad existiert nicht!"

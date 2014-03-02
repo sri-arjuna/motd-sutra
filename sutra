@@ -18,7 +18,7 @@
 		\rUsage: $ME [options] [arguments]
 		\rWhere options are:
 		\r\t-h\tThis screen
-		\r\t-o\tOther stuff
+		\r\t-\tOther stuff
 		\r"
 	ARGS=(${@})
 	ARGS_COUNT=$#
@@ -35,9 +35,15 @@
 	myBook=""
 	if [  -f "$CONFIG" ]
 	then	source "$CONFIG"
-	else	printf "# Configurationfile from $ME ($script_version) - $TITLE
+	else	langs=( $(for f in $(ls -d *);do [ -d $f ] && printf "$f ";done) )
+		if [ "German" = "$(printf "$langs")" ]
+		then	myLanguage=$(printf "$langs")
+		else	tui-echo "Please choose a language:"
+			select myLanguage in $langs;do break;done
+		fi
+		printf "# Configurationfile from $ME ($script_version) - $TITLE
 # Created in the year $(date +'%Y within %B on %d @ %H:%M')
-myLanguage=\"German\"
+myLanguage=\"$myLanguage\"
 myBook=\"\"" > $CONFIG
 		source "$CONFIG"
 	fi
@@ -54,6 +60,55 @@ myBook=\"\"" > $CONFIG
 	#
 	#	Will be done later :: TODO :: TODO
 	#
+	server_info="$1"
+	while getopts "a:(about)h:(help))": name
+	do 	case $name in
+		a|about)
+			tui-header "$ME ($script_version)" "written by: Simon Arjuna Erat (sea)"
+			tui-title "Installed Languages & Books"
+			for lang in $DIR/lang/[A-Z]*;do
+				books=""
+				this="$(basename $lang)"
+				LANG="$this"
+				this="${this:0:1}"
+				this_cap="${this^^}"
+				if [ "$this" = "$this_cap" ]
+				then	tui-echo "Language:" "$LANG"
+					source "${lang,,}"
+					tui-echo "${LangRevlbl[$LANG]}:" 	"${LangRevval[$LANG]}"
+					tui-echo "Authors:" 			"${LangAuthors[@]}" 
+					tui-echo "${LangRevCommentlbl[$LANG]}" 	"${LangRevComment[$LANG]}"
+					
+					for b in $(ls "$lang");do 
+						books+=" $b"
+						tui-title "${TITLE[$LANG]}: $b"
+						CHAPTERS=( "$(ls $DIR/lang/$LANG/$b)" ) #>> /dev/stderr
+						for CHAPTER in "${CHAPTERS[@]}" ;do
+							this_dir="$DIR/lang/$LANG/${b}/${CHAPTER}"
+							chaps=$(cd "${this_dir}";var=( $(ls) );printf "${var[*]}")
+							tui-echo "${CHAPTER}" "$chaps" 
+						done
+					done
+					
+				fi
+			done
+			exit 0			;;
+		h|help)
+			printf "$help_text"
+			exit $RET_HELP	;;
+		o|ow|overwrite)
+			server_info="$OPTARG"
+			mode=ow			;;
+		u|um|umount|unmount)
+			server_info="$OPTARG"
+			mode=u			;;
+		?)	printf "$help_text"
+			exit $RET_FAIL	;;
+		esac
+	done
+	
+	shift $(($OPTIND - 1))
+	ARGS=(${*})
 #
 #	Functions
 #
