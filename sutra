@@ -1,5 +1,5 @@
 #!/bin/sh
-#	Author: 	Simon Arjuna Erat
+#	Author: 	Simon Arjuna Erat (sea)
 #	License:	GPL3
 #	Contact:	erat.simon@gmail.com
 #	Changed:	2014.02.25
@@ -82,19 +82,13 @@ myBook=\"\"" > $CONFIG
 					for b in "$lang"/*;do 
 						books+=" $b"
 						tui-title "${lblTitle[$LANG]}: ${b:(${#lang} + 1)}"
-						CHAPTERS=( "$b"/* ) #>> /dev/stderr # $DIR/lang/$LANG/
-						
-						#echo "${CHAPTERS[@]}"
+						CHAPTERS=( "$b"/* )
 						unset chaps[@]
-						I=0
 						for CHAPTER in "${CHAPTERS[@]}" ;do
 							cd "${CHAPTER}"
-							
 							chaps=( $(ls) )
-								#printf ${var[@]}|sed s,[0-9]\\.,,g
-							
-							#tui-echo "${lblChapter[$LANG]}: ${CHAPTER}" "$chaps"  # ${lblVers[$LANG]}:
-							tui-echo "${lblChapter[$LANG]}: ${CHAPTER:${#b} + 1}" "${lblVers[$LANG]}: ${#chaps[@]}"  
+							tui-echo "${lblChapter[$LANG]}: ${CHAPTER:${#b} + 1}" \
+								"${lblVers[$LANG]}: ${#chaps[@]}"  
 						done
 					done
 					
@@ -102,7 +96,7 @@ myBook=\"\"" > $CONFIG
 			done
 			exit 0			;;
 		h|help)
-			printf "\r$help_text"
+			printf "$help_text"
 			exit $RET_HELP	;;
 		o|ow|overwrite)
 			server_info="$OPTARG"
