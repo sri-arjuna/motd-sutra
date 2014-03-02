@@ -25,6 +25,7 @@
 	ARGS_COUNT=$#
 	[ -z $WIDTH ] && WIDTH=$(tput cols)
 	LEN=$[ 2 * ${#BORDER_LEFT} ]
+	WIDTH=$[ $WIDTH - $LEN ]
 	CONFIG="$HOME/.config/motd-sutra.conf"
 	
 #
@@ -78,15 +79,22 @@ myBook=\"\"" > $CONFIG
 					tui-echo "Authors:" 			"${LangAuthors[@]}" 
 					tui-echo "${LangRevCommentlbl[$LANG]}" 	"${LangRevComment[$LANG]}"
 					
-					for b in $(ls "$lang");do 
+					for b in "$lang"/*;do 
 						books+=" $b"
-						tui-title "${lblTitle[$LANG]}: $b"
-						CHAPTERS=( "$(ls $DIR/lang/$LANG/$b)" ) #>> /dev/stderr
+						tui-title "${lblTitle[$LANG]}: ${b:(${#lang} + 1)}"
+						CHAPTERS=( "$b"/* ) #>> /dev/stderr # $DIR/lang/$LANG/
+						
+						#echo "${CHAPTERS[@]}"
+						unset chaps[@]
+						I=0
 						for CHAPTER in "${CHAPTERS[@]}" ;do
-							this_dir="$DIR/lang/$LANG/${b}/${CHAPTER}"
-							chaps=$(cd "${this_dir}";unset var[@];var=( $(ls) );printf "${var[*]}"|sed s,[0-9]\\.,,g)
+							cd "${CHAPTER}"
+							
+							chaps=( $(ls) )
+								#printf ${var[@]}|sed s,[0-9]\\.,,g
+							
 							#tui-echo "${lblChapter[$LANG]}: ${CHAPTER}" "$chaps"  # ${lblVers[$LANG]}:
-							tui-echo "${lblChapter[$LANG]}: ${CHAPTER}" "${lblVers[$LANG]}: $(echo $chaps|wc|awk '{print $2}')"  
+							tui-echo "${lblChapter[$LANG]}: ${CHAPTER:${#b} + 1}" "${lblVers[$LANG]}: ${#chaps[@]}"  
 						done
 					done
 					
@@ -180,9 +188,21 @@ myBook=\"\"" > $CONFIG
 #
 #	Display to user : Actual Sutra
 #
-	cat "$BOOKS_DIR/$myBook/$CHAPTER/$SUTRA"
-	printf "\n"
+	case $myLanguage in
+	German)	CONTENT=$(cat "$BOOKS_DIR/$myBook/$CHAPTER/$SUTRA"|sed s,ä,ae,g|sed s,ö,oe,g|sed s,ü,ue,g|sed s,ã,a,g|sed s,ñ,n,g)
+		# Note: the 'sed's are just to 'align' tui-echo's output 
+		# 	as long it has issues with 'special-chars' (äöü,ãñ,etc)
+		WIDTH=$[ $WIDTH - 5 ]
+		;;
+	*)	CONTENT=$(cat "$BOOKS_DIR/$myBook/$CHAPTER/$SUTRA")
+		;;
+	esac
+	while [ ! "" = "$CONTENT" ];do
+		line=$(printf "${CONTENT:0:$WIDTH}"|sed s,' '$,,g) # sed is additional attemp to remove trailing spaces
+		tui-echo "$line"
+		CONTENT="${CONTENT:${#line}}"
+	done
 #
 #	Return to old/origin location
 #
-	cd $Old
+	cd $OLD
