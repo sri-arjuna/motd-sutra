@@ -3,23 +3,23 @@
 #	License:	GPL3
 #	Contact:	erat.simon@gmail.com
 #	Changed:	2014.02.25
-#	Created:	2014.02.27
+#	Created:	2014.03.02
 #
 #	Variable defaults
 #
 	source tui
-	script_version=0.1
+	script_version=0.2
 	ME="$(basename $0)"
 	DIR="/usr/share/$ME"
 	OLD="$(pwd)"
 	[ ! -z ${TITLE[@]} ] && unset TITLE[@]
-	help_text="\r$ME ($script_version)
+	help_text="\n$ME ($script_version)
 		\r$TITLE
 		\rUsage: $ME [options] [arguments]
 		\rWhere options are:
-		\r\t-h\tThis screen
+		\r\t-h|help \tThis screen
 		\r\t-a|about\tPrints information about all installed language packes
-		\r\t\tand therefore of all installed books and their chapters & verses.
+		\r\t\t\tand therefore of all installed books and their chapters & verses count.
 		\r"
 	ARGS=(${@})
 	ARGS_COUNT=$#
@@ -58,11 +58,8 @@ myBook=\"\"" > $CONFIG
 #
 #	Variable handling
 #
-	#
-	#	Will be done later :: TODO :: TODO
-	#
 	server_info="$1"
-	while getopts "a:(about)h:(help))": name
+	while getopts "a:(about)h:(help)": name
 	do 	case $name in
 		a|about)
 			tui-header "$ME ($script_version)" "written by: Simon Arjuna Erat (sea)"
@@ -87,8 +84,9 @@ myBook=\"\"" > $CONFIG
 						CHAPTERS=( "$(ls $DIR/lang/$LANG/$b)" ) #>> /dev/stderr
 						for CHAPTER in "${CHAPTERS[@]}" ;do
 							this_dir="$DIR/lang/$LANG/${b}/${CHAPTER}"
-							chaps=$(cd "${this_dir}";var=( $(ls) );printf "${var[*]}")
-							tui-echo "${lblChapter[$LANG]}: ${CHAPTER}" "$chaps"  # ${lblVers[$LANG]}: 
+							chaps=$(cd "${this_dir}";unset var[@];var=( $(ls) );printf "${var[*]}"|sed s,[0-9]\\.,,g)
+							#tui-echo "${lblChapter[$LANG]}: ${CHAPTER}" "$chaps"  # ${lblVers[$LANG]}:
+							tui-echo "${lblChapter[$LANG]}: ${CHAPTER}" "${lblVers[$LANG]}: $(echo $chaps|wc|awk '{print $2}')"  
 						done
 					done
 					
@@ -96,7 +94,7 @@ myBook=\"\"" > $CONFIG
 			done
 			exit 0			;;
 		h|help)
-			printf "$help_text"
+			printf "\r$help_text"
 			exit $RET_HELP	;;
 		o|ow|overwrite)
 			server_info="$OPTARG"

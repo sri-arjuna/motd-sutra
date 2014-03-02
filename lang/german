@@ -3,7 +3,7 @@
 # Append, Edit only these values here:
 #	* Modify the comment value for translation-revision comments
 	LangRevval[German]=" 1 "
-	LangRevComment[German]="alle Verse (kaptiel 1) abschreiben"
+	LangRevComment[German]="Erstmal alle Verse (Kaptiel 1) abschreiben"
 #	* If fyou helped writing content,
 #	     append yourself after a coma: ','
 	LangAuthors[German]="Simon Arjuna Erat (sea)"
@@ -19,14 +19,14 @@
 #	Words
 #
 	lblChapter[German]="Kapitel"
-	lblVers[German]="Vers"
+	lblVers[German]="Vers/e"
 	lblTitle[German]="Titel"
 	lblLanguage[German]="Sprache"
 #
 #	'Interface':	Book
 #
 	lblChooseBookOne[German]="Es wurde automatisch $(ls $DIR/lang/German) ausgewählt."
-	lblChooseBook[German]="Bitte wähle ein Buch aus dem die Sutra's angezeigt werden sollen."
+	lblChooseBook[German]="Bitte waehle ein Buch aus dem die Sutra's angezeigt werden sollen."
 	lblChooseBookDone[German]="wurde ausgewählt."
 #
 #	'Interface':	Path
@@ -35,9 +35,9 @@
 #
 #	'Interface':	About
 #
-	lblAboutTitle[German]="Installerte Sprachen und Bücher"
+	lblAboutTitle[German]="Installerte Sprachen und Buecher"
 #
 #	Author Information
 #
-	LangRevlbl[German]="Überarbeitung"
+	LangRevlbl[German]="Ueberarbeitung"
 	LangRevCommentlbl[German]="Kommentar:"
