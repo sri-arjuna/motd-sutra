@@ -1,68 +1,157 @@
-#!/bin/sh
+#!/bin/bash
+#
+# Copyright (c) 2014 Simon Arjuna Erat (sea)  <erat.simon@gmail.com>
+# All rights reserved.
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
+# ------------------------------------------------------------------------
+#
+#	File:		sutra2
 #	Author: 	Simon Arjuna Erat (sea)
-#	License:	GPL3
 #	Contact:	erat.simon@gmail.com
-#	Changed:	2014.02.25
-#	Created:	2014.03.02
+#	License:	GNU Lesser General Public License (LGPL)
+#	Created:	2014.07.27
+#	Changed:	2014.07.27
+	script_version=0.0.1
+	TITLE="sutra2"
+#	Description:	Text
+#			...
+#			...
 #
-#	Variable defaults
 #
-	source tui
-	script_version=0.2
-	ME="$(basename $0)"
-	DIR="/usr/share/$ME"
-	OLD="$(pwd)"
-	[ ! -z ${TITLE[@]} ] && unset TITLE[@]
-	help_text="\n$ME ($script_version)
-		\r$TITLE
-		\rUsage: $ME [options] [arguments]
-		\rWhere options are:
-		\r\t-h|help \tThis screen
-		\r\t-a|about\tPrints information about all installed language packes
-		\r\t\t\tand therefore of all installed books and their chapters & verses count.
-		\r"
-	ARGS=(${@})
-	ARGS_COUNT=$#
-	[ -z $WIDTH ] && WIDTH=$(tput cols)
-	LEN=$[ 2 * ${#BORDER_LEFT} ]
-	WIDTH=$[ $WIDTH - $LEN ]
-	CONFIG="$HOME/.config/motd-sutra.conf"
+#	Script Environment
+#
+	ME="${0##*/}"			# Basename of $0
+	ME="${ME/.sh/}"			# Cut off .sh extension
+	[[ ! "." = "$(dirname $0)" ]] && \
+		ME_DIR="$(dirname $0)" || \
+		ME_DIR="$(pwd)"		# Dirname of $0
+	ME_DIR=/home/sea/prjs/sutra
+	CFG_DIR="$HOME/.config/$ME"	# Configuration directory
+	CONFIG="$CFG_DIR/$ME.conf"	# Configuration file
+	CONFIG_FILE_ARRAY=("$CONFIG")	# An array of all configuration scripts used by sutra2
+	LOG="$CFG_DIR/$ME.log"		# Logfile
+	tempfile="$CFG_DIR/$ME.tmp"	# Tempfile
+	REQUIRES="pack ages as string"
+	mach="/home/sea/prjs/tui/bin/tui-printf -E "
+	#$mach "test"
+	#exit
+#
+#	Help text
+#
+	help_text="
+$ME ($script_version)
+${TITLE^}
+Usage: 		$ME [options] [arguments]
+Examples:	$ME -a
+		$ME -e optVAL
+		$ME ARG
+Where options are:
+	-h(elp) 		This screen
+	-C(onf			Show the config/setup dialog
+	-a(bout)		About the authors (translations of books)
+	-----------------------------------------------------------------
+	-b	'FULL NAME'	The books name
+	-c	NUM		Chapters number
+	-v	NUM		Vers's number
 	
+
+Files:
+--------------------------------------
+Script:		$ME
+Script-Dir:	$ME_DIR
+Config: 	$CONFIG
+Config_Dir:	$CFG_DIR
+Log:		$LOG
+Tempfile:	$tempfile
+"
 #
-#	Empty configuration values,
-#	check for $CONFIG and retrieve values if exist
-#	create and define default configuration otherwise
+#	Configuration file template
 #
-	myLanguage=""
-	myBook=""
-	if [  -f "$CONFIG" ]
-	then	source "$CONFIG"
-	else	langs=( $(for f in $(ls -d *);do [ -d $f ] && printf "$f ";done) )
-		if [ "German" = "$(printf "$langs")" ]
-		then	myLanguage=$(printf "$langs")
-		else	tui-echo "Please choose a language:"
-			select myLanguage in $langs;do break;done
-		fi
-		printf "# Configurationfile from $ME ($script_version) - $TITLE
-# Created in the year $(date +'%Y within %B on %d @ %H:%M')
-myLanguage=\"$myLanguage\"
-myBook=\"\"" > $CONFIG
-		source "$CONFIG"
+	config_template="#!/bin/bash
+# Configuration file for $ME ($script_version) by Simon Arjuna Erat (sea)
+#
+#	Variables
+#
+	lang=german
+		
+"
+#
+#	Functions
+#
+	doLog() { # "MESSAGE STRING"
+	# Prints: Time & "Message STRING"
+	# See 'tui-log -h' for more info
+		tui-log -t "$LOG" "$1"
+	}
+	
+	MenuSetup() { # 
+	# Configures the variables/files used by the script
+	#
+	#	Check for config file
+	#
+		[[ -f "$CONFIG" ]] || \
+			( printf "$config_template" > "$CONFIG" ; doLog "Config: Default configurationfile created" )
+	#
+	#	Menu entries
+	#
+		opwd=$(pwd)
+		cd "$CFG_DIR"
+	#
+	#	Menu / Action
+	#
+		current=$(tui-value-get $CONFIG lang)
+		tui-echo "Your current language choice is:" "$current"
+		tui-yesno "Change this?" || return 0
+		select newlang in $(cd $ME_DIR/lang/; ls|grep ^[a-z]);do break;done
+		tui-value-set $CONFIG lang $newlang
+	}
+#
+#	Environment checks
+#
+	# This is optimized for a one-time setup
+	if [[ ! -e "$CONFIG" ]]
+	then	[[ -d "$CFG_DIR" ]] || 			( mkdir -p "$CFG_DIR" ; tui-echo "Entering first time setup." "$SKIP" )
+		[[ ! -e "$LOG" ]] && \
+			touch $LOG && \
+			doLog "------------------------------------------" && \
+			doLog "Created logfile of $ME ($script_version)" && \
+			doLog "------------------------------------------" && \
+			doLog "Setup : First config"
+		sleep 0.5
+		MenuSetup
 	fi
+	# Load default values before argument handling
+	myLanguage="german"	# Hardcoded default (because of config file)
+	myBook=""
+	myChap=""
+	myVers=""
+	langs=""
+	unset lblChapter[@] lblVers[@] lblTitle[@] lblLanguage[@] 
+	unset lblChooseBookOne[@] lblChooseBook[@] lblChooseBookDone[@] 
+	unset lblNoPath[@] lblAboutTitle[@] langRevlbl[@] langRevCommentlbl
+	source "$CONFIG" || \
+		( doLog "Failed to load: $CONFIG" ; tui-status 1 "Failed to load: $CONFIG" )
 #
-#	Load array file with title caption
+#	Catching Arguments
 #
-	LANGUAGE="$DIR/lang/${myLanguage,,}" ; 	source "$LANGUAGE"
-	BOOKS_DIR="$DIR/lang/$myLanguage"
-	myTitle="${TITLE[$myLanguage]}"
-	cd "$BOOKS_DIR" ; BOOKS_LIST="$(ls -ld *|awk '{print $9}')"
-#
-#	Variable handling
-#
-	server_info="$1"
-	while getopts "a:(about)h:(help)": name
-	do 	case $name in
-		a|about)
+	#[[ -z $1 ]] && printf "$help_text" && exit $RET_FAIL
+	# A ':' after a char indicates that this option requires an argument
+	while getopts "ab:c:v:hCL" opt
+	do 	case $opt in
+		a)	# This is about
 			tui-header "$ME ($script_version)" "written by: Simon Arjuna Erat (sea)"
 			for lang in $DIR/lang/[A-Z]*;do
 				books=""
@@ -94,109 +183,80 @@ myBook=\"\"" > $CONFIG
 					
 				fi
 			done
-			exit 0			;;
-		h|help)
-			printf "$help_text"
-			exit $RET_HELP	;;
-		o|ow|overwrite)
-			server_info="$OPTARG"
-			mode=ow			;;
-		u|um|umount|unmount)
-			server_info="$OPTARG"
-			mode=u			;;
-		?)	printf "$help_text"
-			exit $RET_FAIL	;;
+			exit 0
+			;;
+		b)	# book
+			myBook="$OPTARG"
+			;;
+		c)	# chapter
+			myChap="$OPTARG"
+			;;
+		v)	# vers
+			myVers="$OPTARG"
+			;;
+		h)	printf "$help_text"
+			exit $RET_HELP
+			;;
+		L)	less "$LOG"	
+			exit $RET_DONE
+			;;
+		C)	MenuSetup
+			exit $RET_DONE
+			;;
+		# *)	printf "$help_text" ; exit $?	;;
 		esac
 	done
-	
 	shift $(($OPTIND - 1))
-	ARGS=(${*})
 #
-#	Functions
+#	Verify Variables
 #
-	rnd() { # MAX [ MIN=0 ]
-	# Returns a random number upto MAX, 
-	# or if provided, between MIN and MAX.
-	#
-	#	Arguments
-	#
-		[ -z $1 ] && printf "\rEE$0::Must provide MAX value!\n" && exit 1
-		count=0
-		min=0
-		task=todo
-		rnd=$RANDOM
-		[ ! -z $2 ] && 
-			(( if [ $1 -gt $2 ] ;then min=$2;max=$1;else min=$1;max=$2;fi )) || \
-			max=$1
-	#
-	#	Action
-	#
-		while [ $rnd -gt $max ]  #&& (( [ ! -z $2 ] && [ $min -gt $rnd ] ))
-		do	rnd=$(($RANDOM*$max/$RANDOM))
-		done
-		printf $rnd
-	}
-	GetRndfromFolder() { # DIRECTORY
-	# Change to DIRECTORY (& back when done),
-	# returns a random item from its content (file-,foldername)
-		unset ALL[@]
-		old="$(pwd)"
-		if [ -d "$1" ] 
-		then	cd "$1"
-		else	tui-status 1 "${lblNoPath[$myLanguage]} ($1)";exit 1
-		fi
-		ALL=( * )
-		TOTAL=$[ ${#ALL[@]} ]
-		STR="${ALL[$(rnd $[ $TOTAL - 1 ])]}"
-		printf "$STR"
-		cd $old
-	}
+	[[ -z $lang ]] && lang=$myLanguage
+	list_books=( $(cd $ME_DIR/lang/${lang^};ls) )
+	
+	# BOOK
+	[[ -z $myBook ]] && myBook=${list_books[$(rnd $[ ${#list_books[@]} -1 ] )]}
+	BOOK_DIR="$ME_DIR/lang/${lang^}/$myBook"
+	list_chaps=( $(cd $BOOK_DIR;ls))
+	
+	# CHAPTER
+	[[ -z $myChap ]] && \
+		myChap=${list_chaps[$(rnd $[ ${#list_chaps[@]} -1 ] )]} || \
+		myChap=$(cd $BOOK_DIR;ls *_${myChap}_*)
+	THISFILE=$BOOK_DIR/$myChap
+	
+	# VERS
+	list_verses=$(grep -v "#" $THISFILE|wc -l )
+	[[ -z $myVers ]] && myVers=$(rnd $list_verses )
+	[[ 0 -eq $myVers ]] && myVers=1
 #
-#	Verify we have a book to look for sutra
+#	Display & Action
 #
-	if [ -z $myBook ]
-	then	if [ "$(printf $BOOKS_LIST|wc|awk '{print $2}')" -eq 1 ]
-		then	TB="$(printf $BOOKS_LIST)"
-			sed s,myBook=\"\",myBook=\"$TB\",g -i $CONFIG
-			tui-status $? "${lblChooseBookOne[$myLanguage]}"	&& \
-				source "$CONFIG" || exit 1
-		else	tui-echo "${lblChooseBook[$myLanguage]}"
-			select TB in $BOOKS_LIST;do break;done
-			sed s,myBook=\"\",myBook=\"$TB\",g -i $CONFIG
-			tui-status $? "$TB ${lblChooseBookDone[$myLanguage]}"	&& \
-				source "$CONFIG" || exit 1
-		fi
-	fi
-#
-#	Get a random chapter from within the book
-#	and then choose a random sutra from that chapter-dir
-#
-	CHAPTER=$(GetRndfromFolder "$BOOKS_DIR/$myBook")
-	SUTRA=$(GetRndfromFolder "$BOOKS_DIR/$myBook/$CHAPTER")
-#
-#	Display to user : Header
-#
-	tui-header	"$myTitle : $myBook" \
-		 	"$ME ($script_version), ${LangRevlbl[$myLanguage]}: ${LangRevval[$myLangauge]}"
-	tui-title "$SUTRA) $CHAPTER"
-#
-#	Display to user : Actual Sutra
-#
-	case $myLanguage in
-	German)	CONTENT=$(cat "$BOOKS_DIR/$myBook/$CHAPTER/$SUTRA"|sed s,ä,ae,g|sed s,ö,oe,g|sed s,ü,ue,g|sed s,ã,a,g|sed s,ñ,n,g)
-		# Note: the 'sed's are just to 'align' tui-echo's output 
-		# 	as long it has issues with 'special-chars' (äöü,ãñ,etc)
-		WIDTH=$[ $WIDTH - 5 ]
-		;;
-	*)	CONTENT=$(cat "$BOOKS_DIR/$myBook/$CHAPTER/$SUTRA")
-		;;
+	tui-header "$ME ($script_version)" "$myBook"
+	lblChap=
+	lblChap=$(printf "${myChap:3:-4}"|sed s,_,' ',g) #|while read num title;do printf "$title - $num.";done)
+#	set -x
+	# sed s,'_',' ',g
+#	oIFS="$IFS"
+#	IFS="_"
+#	lblChap=$(printf "$myChap"| while read ABR ID TITLE;do printf "$ID) $TITLE";done)
+#	IFS="$oIFS"
+#	set +x
+	tui-title "${lblChap/ /) } : $myVers"
+	
+	# Get the string
+	oIFS="$IFS"
+	IFS=":"
+	STR=$(grep -nv "#"  $THISFILE | grep ^$myVers:|while read ID TEXT;do printf "$TEXT";done)
+	IFS="$oIFS"
+	
+	# Fix odd chars
+	case ${lang^} in
+	German)	# TODO : doesnt work yet properly
+		STR=$(printf "$STR"|sed s,"ä",ae,g|sed s,"ö",oe,g|sed s,"ü",ue,g|sed s,"ã",a,g|sed s,"ñ",n,g)
+	#	StR=$(printf "$STR"|sed s,"\303\274","ü",g)
 	esac
-	while [ ! "" = "$CONTENT" ];do
-		line=$(printf "${CONTENT:0:$WIDTH}"|sed s,' '$,,g) # sed is additional attemp to remove trailing spaces
-		tui-echo "$line"
-		CONTENT="${CONTENT:${#line}}"
-	done
-#
-#	Return to old/origin location
-#
-	cd $OLD
+	
+	# Finaly print it
+	# This STR below prints just fine, strings with umlauts not..
+	STR="AAAAAAAAAAAAAAaaaaaaaaaaaaa BBBBBBBBBBBBBBbbbbbbbbbbbbbbbbbb cccccccccccccccccccccccDDDDDDDDDDDDDDDDDDDDD                                                  eeeeeeeeeeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEeee fffffffffffffffffffffffffffFFFFFFFFFFFFFFFFFFFFFFFFFFFFfff                                           gggggggggggggggggggggggggGGGGGGGGGGGGGGGGGGGGGGGGGggg hhhhhhhhhhhhhhhhhhhhhhHHHHHHHHHHHHHHHHHHHHHHHHHHh iiiiiiiiiiiiiiiiiiiiiiiiiIIIIIIIIIIIIIIIIIIIIIIIIiiii" ; STR+="$STR"
+	tui-echo "$STR"
