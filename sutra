@@ -258,5 +258,5 @@ Tempfile:	$tempfile
 	
 	# Finaly print it
 	# This STR below prints just fine, strings with umlauts not..
-	STR="AAAAAAAAAAAAAAaaaaaaaaaaaaa BBBBBBBBBBBBBBbbbbbbbbbbbbbbbbbb cccccccccccccccccccccccDDDDDDDDDDDDDDDDDDDDD                                                  eeeeeeeeeeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEeee fffffffffffffffffffffffffffFFFFFFFFFFFFFFFFFFFFFFFFFFFFfff                                           gggggggggggggggggggggggggGGGGGGGGGGGGGGGGGGGGGGGGGggg hhhhhhhhhhhhhhhhhhhhhhHHHHHHHHHHHHHHHHHHHHHHHHHHh iiiiiiiiiiiiiiiiiiiiiiiiiIIIIIIIIIIIIIIIIIIIIIIIIiiii" ; STR+="$STR"
+	#STR="AAAAAAAAAAAAAAaaaaaaaaaaaaa BBBBBBBBBBBBBBbbbbbbbbbbbbbbbbbb cccccccccccccccccccccccDDDDDDDDDDDDDDDDDDDDD                                                  eeeeeeeeeeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEeee fffffffffffffffffffffffffffFFFFFFFFFFFFFFFFFFFFFFFFFFFFfff                                           gggggggggggggggggggggggggGGGGGGGGGGGGGGGGGGGGGGGGGggg hhhhhhhhhhhhhhhhhhhhhhHHHHHHHHHHHHHHHHHHHHHHHHHHh iiiiiiiiiiiiiiiiiiiiiiiiiIIIIIIIIIIIIIIIIIIIIIIIIiiii" ; STR+="$STR"
 	tui-echo "$STR"
