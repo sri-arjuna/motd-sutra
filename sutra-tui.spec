@@ -13,8 +13,6 @@ Requires:       %{name}-german
 
 %description
 Prints a random sutra from the Vedics upon a new terminal.
-
-#%desciption %{name}
 This package provides german sutra.
 
 %prep
