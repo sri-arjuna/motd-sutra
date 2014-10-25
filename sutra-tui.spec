@@ -30,7 +30,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p %{buildroot}%{_bindir}/ \
          %{buildroot}%{_datarootdir}/%{name}/lang \
          %{buildroot}/%{_mandir}/man1 \
-         %{buildroot}/%{_sysconfigdir}/profile.d
+         %{buildroot}/%{_sysconfdir}/profile.d
 rm -fr %{name}/.git
 mv %{name}/sutra.sh %{buildroot}%{_bindir}/sutra
 mv %{name}/[RL]*  %{buildroot}%{_datarootdir}/%{name}

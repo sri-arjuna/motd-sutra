@@ -44,8 +44,8 @@
 	CONFIG_FILE_ARRAY=("$CONFIG")	# An array of all configuration scripts used by sutra2
 	LOG="$CFG_DIR/$ME.log"		# Logfile
 	tempfile="$CFG_DIR/$ME.tmp"	# Tempfile
-	REQUIRES="pack ages as string"
-	mach="/home/sea/prjs/tui/bin/tui-printf -E "
+	#REQUIRES="pack ages as string"
+	#mach="/home/sea/prjs/tui/bin/tui-printf -E "
 	#$mach "test"
 	#exit
 #
