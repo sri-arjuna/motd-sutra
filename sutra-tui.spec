@@ -29,11 +29,13 @@ rm -rf $RPM_BUILD_ROOT
 
 mkdir -p %{buildroot}%{_bindir}/ \
          %{buildroot}%{_datarootdir}/%{name}/lang \
-         %{buildroot}/%{_mandir}/man1
+         %{buildroot}/%{_mandir}/man1 \
+         %{buildroot}/%{_sysconfigdir}/profile.d
 rm -fr %{name}/.git
 mv %{name}/sutra.sh %{buildroot}%{_bindir}/sutra
 mv %{name}/[RL]*  %{buildroot}%{_datarootdir}/%{name}
 mv %{name}/sutra.1 %{buildroot}/%{_mandir}/man1
+mv %{name}/%{name}.sh %{buildroot}%{_sysconfdir}/profile.d/
 
 ##install %{name}-german
 mkdir -p %{buildroot}%{_datarootdir}/%{name}/lang
@@ -44,6 +46,7 @@ mv %{name}/lang/[Gg]erman %{buildroot}%{_datarootdir}/%{name}/lang
 %doc %{_datarootdir}/%{name}/LICENSE
 %doc %{_mandir}/man1/sutra.1.gz
 %{_bindir}/sutra
+%{_sysconfdir}/profile.d/%{name}.sh
 
 #%files %{name}-german
 %{_datarootdir}/%{name}/lang/German
