@@ -1,11 +1,13 @@
 Name:           sutra-tui
-Version:        0.3
-Release:        0%{?dist}
+Version:        0.4
+Release:        1%{?dist}
 Summary:        Vedic Sutra
 
 License:        GPLv3
 URL:            https://github.com/sri-arjuna/tui-sutra
 Source0:        %{name}-%{version}.tar.gz
+
+BuildArch:       noarch
 
 Requires:       tui
 Requires:       essentials
@@ -32,14 +34,15 @@ mkdir -p %{buildroot}%{_bindir}/ \
          %{buildroot}/%{_mandir}/man1 \
          %{buildroot}/%{_sysconfdir}/profile.d
 rm -fr %{name}/.git
-mv %{name}/sutra.sh %{buildroot}%{_bindir}/sutra
+#mv %{name}/sutra.sh %{buildroot}%{_bindir}/sutra
+mv %{name}/sutra2 %{buildroot}%{_bindir}/sutra
 mv %{name}/[RL]*  %{buildroot}%{_datarootdir}/%{name}
 mv %{name}/sutra.1 %{buildroot}/%{_mandir}/man1
 mv %{name}/%{name}.sh %{buildroot}%{_sysconfdir}/profile.d/
 
 ##install %{name}-german
 mkdir -p %{buildroot}%{_datarootdir}/%{name}/lang
-mv %{name}/lang/[Gg]erman %{buildroot}%{_datarootdir}/%{name}/lang
+mv %{name}/lang/* %{buildroot}%{_datarootdir}/%{name}/lang
 
 %files
 %doc %{_datarootdir}/%{name}/README.md 
@@ -49,9 +52,11 @@ mv %{name}/lang/[Gg]erman %{buildroot}%{_datarootdir}/%{name}/lang
 %{_sysconfdir}/profile.d/%{name}.sh
 
 #%files %{name}-german
-%{_datarootdir}/%{name}/lang/German
-%{_datarootdir}/%{name}/lang/german
+%{_datarootdir}/%{name}/lang/[Gg][eE][rR][mM][aA][nN]
 
 %changelog
+* Mon Jan 19 2015 Simon A. Erat <erat.simon@gmail.com> 0.4
+- Change algorythm ans structure
+
 * Fri Oct 24 2014 Simon A. Erat <erat.simon@gmail.com> 0.3
 - Initial package

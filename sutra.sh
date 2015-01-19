@@ -25,7 +25,7 @@
 #	Created:	2014.07.27
 #	Changed:	2014.07.27
 	script_version=0.0.1
-	TITLE="sutra2"
+	TITLE="sutra"
 #	Description:	Text
 #			...
 #			...
@@ -38,7 +38,8 @@
 	[[ ! "." = "$(dirname $0)" ]] && \
 		ME_DIR="$(dirname $0)" || \
 		ME_DIR="$(pwd)"		# Dirname of $0
-	ME_DIR=/home/sea/prjs/sutra
+	
+	ME_DIR=/usr/share/$ME/
 	CFG_DIR="$HOME/.config/$ME"	# Configuration directory
 	CONFIG="$CFG_DIR/$ME.conf"	# Configuration file
 	CONFIG_FILE_ARRAY=("$CONFIG")	# An array of all configuration scripts used by sutra2
@@ -102,8 +103,9 @@ Tempfile:	$tempfile
 	#
 	#	Check for config file
 	#
-		[[ -f "$CONFIG" ]] || \
-			( printf "$config_template" > "$CONFIG" ; doLog "Config: Default configurationfile created" )
+		 [[ -d "$CFG_DIR" ]] || mkdir -p "$CFG_DIR"
+		 [[ -f "$CONFIG" ]] || \
+			( printf "$config_template" > "$CONFIG" ; doLog "Config: Default configuration created" )
 	#
 	#	Menu entries
 	#
@@ -112,11 +114,11 @@ Tempfile:	$tempfile
 	#
 	#	Menu / Action
 	#
-		current=$(tui-value-get $CONFIG lang)
+		current=$(tui-conf-get $CONFIG lang)
 		tui-echo "Your current language choice is:" "$current"
 		tui-yesno "Change this?" || return 0
 		select newlang in $(cd $ME_DIR/lang/; ls|grep ^[a-z]);do break;done
-		tui-value-set $CONFIG lang $newlang
+		tui-conf-set $CONFIG lang $newlang
 	}
 #
 #	Environment checks
@@ -133,6 +135,7 @@ Tempfile:	$tempfile
 		sleep 0.5
 		MenuSetup
 	fi
+	. "$CONFIG"
 	# Load default values before argument handling
 	myLanguage="german"	# Hardcoded default (because of config file)
 	myBook=""
@@ -233,7 +236,7 @@ Tempfile:	$tempfile
 #
 	tui-header "$ME ($script_version)" "$myBook"
 	lblChap=
-	lblChap=$(printf "${myChap:3:-4}"|sed s,_,' ',g) #|while read num title;do printf "$title - $num.";done)
+	lblChap=$(echo "${myChap:3:-4}"|sed s,_,' ',g) #|while read num title;do printf "$title - $num.";done)
 #	set -x
 	# sed s,'_',' ',g
 #	oIFS="$IFS"
