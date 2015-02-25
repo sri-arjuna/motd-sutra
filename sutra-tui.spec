@@ -1,6 +1,6 @@
 Name:           sutra-tui
 Version:        0.4
-Release:        1%{?dist}
+Release:        9%{?dist}
 Summary:        Vedic Sutra
 
 License:        GPLv3
@@ -10,7 +10,6 @@ Source0:        %{name}-%{version}.tar.gz
 BuildArch:       noarch
 
 Requires:       tui
-Requires:       essentials
 #Requires:       %{name}-german
 
 %description
@@ -55,8 +54,15 @@ mv %{name}/lang/* %{buildroot}%{_datarootdir}/%{name}/lang
 %{_datarootdir}/%{name}/lang/[Gg][eE][rR][mM][aA][nN]
 
 %changelog
-* Mon Jan 19 2015 Simon A. Erat <erat.simon@gmail.com> 0.4
-- Change algorythm ans structure
+* Tue Feb 24 2015 Simon A. Erat <erat.simon@gmail.com> 0.4.9
+- Massive rewrite & start optimization
+- Using now language file for help text output.
 
-* Fri Oct 24 2014 Simon A. Erat <erat.simon@gmail.com> 0.3
+* Mon Feb 02 2015 Simon A. Erat <erat.simon@gmail.com> 0.0.4
+- Changed german sutra files to utf8-w/o-bomS
+
+* Mon Jan 19 2015 Simon A. Erat <erat.simon@gmail.com> 0.0.3
+- Change algorythm and structure
+
+* Fri Oct 24 2014 Simon A. Erat <erat.simon@gmail.com> 0.0.1
 - Initial package

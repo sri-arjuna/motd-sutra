@@ -103,8 +103,8 @@ Tempfile:	$tempfile
 	#
 	#	Check for config file
 	#
-		 [[ -d "$CFG_DIR" ]] || mkdir -p "$CFG_DIR"
-		 [[ -f "$CONFIG" ]] || \
+		[ -d "$CFG_DIR" ] || mkdir -p "$CFG_DIR"
+		[ -f "$CONFIG" ] || \
 			( printf "$config_template" > "$CONFIG" ; doLog "Config: Default configuration created" )
 	#
 	#	Menu entries
@@ -124,9 +124,9 @@ Tempfile:	$tempfile
 #	Environment checks
 #
 	# This is optimized for a one-time setup
-	if [[ ! -e "$CONFIG" ]]
-	then	[[ -d "$CFG_DIR" ]] || 			( mkdir -p "$CFG_DIR" ; tui-echo "Entering first time setup." "$SKIP" )
-		[[ ! -e "$LOG" ]] && \
+	if [ ! -e "$CONFIG" ]
+	then	[ -d "$CFG_DIR" ] || 			( mkdir -p "$CFG_DIR" ; tui-echo "Entering first time setup." "$SKIP" )
+		[ ! -e "$LOG" ] && \
 			touch $LOG && \
 			doLog "------------------------------------------" && \
 			doLog "Created logfile of $ME ($script_version)" && \
@@ -156,7 +156,7 @@ Tempfile:	$tempfile
 	do 	case $opt in
 		a)	# This is about
 			tui-header "$ME ($script_version)" "written by: Simon Arjuna Erat (sea)"
-			for lang in $DIR/lang/[A-Z]*;do
+			for lang in $(echo "$DIR/lang/"[A-Z]*);do
 				books=""
 				this="$(basename $lang)"
 				LANG="$this"
@@ -213,24 +213,27 @@ Tempfile:	$tempfile
 #
 #	Verify Variables
 #
-	[[ -z $lang ]] && lang=$myLanguage
+	set -x
+	[ -z "$lang" ] && lang=$myLanguage
 	list_books=( $(cd $ME_DIR/lang/${lang^};ls) )
+	echo $list_books
 	
 	# BOOK
-	[[ -z $myBook ]] && myBook=${list_books[$(rnd $[ ${#list_books[@]} -1 ] )]}
+	[ -z "$myBook" ] && myBook=${list_books[$(rnd $[ ${#list_books[@]} -1 ] )]}
 	BOOK_DIR="$ME_DIR/lang/${lang^}/$myBook"
 	list_chaps=( $(cd $BOOK_DIR;ls))
 	
 	# CHAPTER
-	[[ -z $myChap ]] && \
+	[ -z "$myChap" ] && \
 		myChap=${list_chaps[$(rnd $[ ${#list_chaps[@]} -1 ] )]} || \
 		myChap=$(cd $BOOK_DIR;ls *_${myChap}_*)
 	THISFILE=$BOOK_DIR/$myChap
 	
 	# VERS
 	list_verses=$(grep -v "#" $THISFILE|wc -l )
-	[[ -z $myVers ]] && myVers=$(rnd $list_verses )
-	[[ 0 -eq $myVers ]] && myVers=1
+	[ -z $myVers ] && myVers=$(rnd $list_verses )
+	[ 0 -eq $myVers ] && myVers=1
+	set +x
 #
 #	Display & Action
 #

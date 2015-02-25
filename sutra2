@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ------------------------------------------------------------------------
 #
-# Copyright (c) 2014 by Simon Arjuna Erat (sea), erat.simon@gmail.com
+# Copyright (c) 2014-2015 by Simon Arjuna Erat (sea), erat.simon@gmail.com
 # All rights reserved.
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -19,18 +19,19 @@
 #
 # ------------------------------------------------------------------------
 #
-	s=/bin/tui ; [[ -f $s ]] && . $s  && s=
+	s=/bin/tui ; [ -f $s ] && . $s  && s=
+	source /usr/share/tui/themes/$TUI_THEME
 #
 #	File:		sutra2
 #	Author: 	Simon Arjuna Erat (sea)
 #	Contact:	erat.simon@gmail.com
 #	License:	GNU General Public License (GPL)
 #	Created:	2014.12.22
-#	Changed:	2014.12.22
-	script_version=0.0.1
+#	Changed:	2015.02.24
+	script_version=0.4.9
 	TITLE="Vedic Sutras"
-#	Description:	Text TODO
-#			...  TODO
+#	Description:	A tool to display randome lines of random text files.
+#			Here to display vedic sutras.
 #
 #
 #	Script Environment
@@ -44,45 +45,58 @@
 	CONFIG_DIR="$HOME/.config/$ME"		# Configuration directory
 	CONFIG="$CONFIG_DIR/$ME.conf"			# Configuration file
 	TEMPFILE="$TUI_TEMP_DIR/$ME.tmp"		# Tempfile
-	APP_DIR=/usr/share/sutra
+	APP_DIR=/usr/share/sutra-tui
 	# TODO FIXME
-	APP_DIR=/home/sea/prjs/sutra-tui
+	#APP_DIR=/home/sea/prjs/sutra-tui
 	LANG_DIR=$APP_DIR/lang			# langauge files are small, folders start with capital
+	lang=""
 #
 #	Help text
 #
-#
+	if [ -f "$CONFIG" ]
+	then	source "$CONFIG"
+	else	lang=german
+		tui-bol-dir "$(dirname $CONFIG)"
+		tui-conf-set "$CONFIG" lang "$lang"
+	fi
+	[ -z "$lang" ] && tui-printf -S 1 "No language found" && exit 1
+	
+	LANG="$LANG_DIR/$lang"
+	[ -f "$LANG" ] && source "$LANG"
+	
 	help_text="
 $ME ($script_version)
 ${TITLE^}
-Usage: 		$ME [options] arguments
-Examples:	$ME 
+$help_wrd_usage: 		$ME [$help_wrd_options] $help_wrd_arguments
+$help_wrd_examples:	$ME 
 		$ME -b bg
 		$ME -b bg -c 5 -s 3
-Where options are:
-	-h(elp) 		This screen
-	-b(ook)		BOOK	Select from BOOK
-	-c(hapter)	CHAPTER	Select from CHAPTER
-	-s(utra)	VERSE	Select this VERSE
+$help_str_where:
+	-h(elp) 		$help_str_this
+	-b(ook)		$help_wrd_book	$help_str_select $help_wrd_book
+	-c(hapter)	$help_wrd_chapter	$help_str_select $help_wrd_chapter
+	-s(utra)	$help_wrd_verse	$help_str_select $help_wrd_verse
 	
 
-Files:
+$help_wrd_files:
 --------------------------------------
-Langauges:	$LANG_DIR
+$help_wrd_languages:	$LANG_DIR
+$(cd $LANG_DIR;for l in *;do [ -f "$l" ] && printf "\t\t* $l\n";done)
 "
-#
+# $(cd $LANG_DIR;for l in $(echo [a-z]*);do printf "\t\t* $l\n";done)
+# $(cd $LANG_DIR;for l in *;do [ [a-z] = ${l:0:1} ] && printf "\t\t* $l\n";done)#
 #	Functions
 #
 	GetBook() { # ABR
 	# Enlrages the abrevihation to the full book title
 	#
-		[[ -z "$1" ]] && return 1
+		[ -z "$1" ] && return 1
 		out=""
 		case "$1" in
 		[bB][gG]|[gG]ita)	out="Bhagavad-Gita"	;;
-		[sS][bB])		out="Srimad-Bhagavatam"	;;
+		[sS][bB]|[vV]atam)	out="Srimad-Bhagavatam"	;;
 		esac
-		[[ -z "$out" ]] && \
+		[ -z "$out" ] && \
 			return 1 || \
 			echo "$out"
 		return 0
@@ -110,7 +124,7 @@ Langauges:	$LANG_DIR
 		c)	# Chapter
 			CHAPTER="$OPTARG"
 			;;
-		s)	# Chapter
+		s)	# Sutra
 			SUTRA="$OPTARG"
 			;;
 		l)	LANG="$OPTARG"
@@ -126,78 +140,82 @@ Langauges:	$LANG_DIR
 #	Parse & verify arguments
 #
 	LANG_CONF="$LANG_DIR/$LANG"
-	if [[ -f "$LANG_CONF" ]]
+	if [ -f "$LANG_CONF" ]
 	then	source "$LANG_CONF" || exit 1
 	else	exit 1
 	fi
 	
 	# Book
-	if [[ rnd = "$BOOK" ]]
+	if [ rnd = "$BOOK" ]
 	then	# Set random book
 		BOOK=$(ls ${LANG_DIR}/${LANG^^})
 	else	# Make sure passed argument is a valid book
-		BOOK=$(GetBook $BOOK)
+		BOOK=$(GetBook "$BOOK")
 	fi
 	BOOK_DIR="${LANG_DIR}/${LANG^^}/$BOOK"
 	
 	# Chapter
-	if [[ rnd = "$CHAPTER" ]]
+	if [ rnd = "$CHAPTER" ]
 	then	# Set random book
 		declare LIST
 		LIST=( $(ls "$BOOK_DIR"/*))
 		max=$(( ${#LIST[@]} - 1 ))
-		num=$(rnd 1 $max)
-		while [[ rnd = "$CHAPTER" ]] || [[ "" = "$CHAPTER" ]]
+		num=$(tui-rnd 1 $max)
+		while [ rnd = "$CHAPTER" ] || [ "" = "$CHAPTER" ]
 		do	CHAPTER=${LIST[$num]}
-			num=$(rnd 1 $max)
+			num=$(tui-rnd 1 $max)
 		done
 		#CHAPTER=$(basename $(echo $LIST|awk '{print $1}'))
-		CHAPTER=$(basename $( ls "$BOOK_DIR"/*|grep $num))
+		#CHAPTER=$(basename $( ls "$BOOK_DIR"/*|grep "_"$num"_"))
+		CHAPTER=$(basename $CHAPTER)
 	else	# Make sure passed argument is a valid chapter-file
 		#echo "TODO chapter details"
 		CHAPTER=$( cd "$BOOK_DIR"; ls|grep $CHAPTER)
-		[[ -z "$CHAPTER" ]] && \
+		[ -z "$CHAPTER" ] && \
 			CHAPTER$(($CHAPTER + 1)) && \
 			CHAPTER=$( cd "$BOOK_DIR"; ls|grep $CHAPTER) 
 	fi
 	
 	thatFile="${LANG_DIR}/${LANG^^}/$BOOK/$CHAPTER"
-	[[ -z $thatFile ]] && $0 $@ && exit 0
-	[[ -d "$thatFile" ]] && $0 $@ && exit 0
+	[ -z $thatFile ] && $0 $@ && exit 0
+	[ -d "$thatFile" ] && $0 $@ && exit 0
 	
 	# Sutra
-	if [[ rnd = "$SUTRA" ]]
+	if [ rnd = "$SUTRA" ]
 	then	# Set random sutra number
-		max=$(cat $thatFile|wc -l)
-		SUTRA=$(rnd $max)
+		max=$(cat "$thatFile"|wc -l)
+		#max=$(wc "$thatFile")
+		SUTRA=$(tui-rnd $max 1)
 	fi
 #
 #	Display & Action
 #
-	tui-title "$TITLE - $BOOK - $CHAPTER - $SUTRA"
-	VERS=$(cat -n  "$thatFile" | grep $SUTRA | while read num line;do echo "$line";done)
+	tui-title "$TITLE - $BOOK - ${CHAPTER:3:-4} - $SUTRA"
+	#VERS=$(cat -n  "$thatFile" | grep ^[[:space:]]"$SUTRA:"$ | while read num line;do echo "$line";done)
+	VERS=$(cat -n  "$thatFile" | grep $SUTRA | while read num line;do [ "$SUTRA" = "$num" ] && echo "$line";done)
 	
 	# Now modify the string accordign to the original languages template
-	case $LANG in
-	german)		# Deutsche Umlaute
-			VERS=$(echo "$VERS"|sed s,'ä',ae,g)
-			VERS=$(echo "$VERS"|sed s,'ö',oe,g)
-			VERS=$(echo "$VERS"|sed s,'ü',ue,g)
-			VERS=$(echo "$VERS"|sed s,"Ä",Ae,g)
-			VERS=$(echo "$VERS"|sed s,"Ö",Oe,g)
-			VERS=$(echo "$VERS"|sed s,"Ü",Ue,g)
-			;;
-	esac
+#	case $LANG in
+#	german)		# Deutsche Umlaute
+#			VERS=$(echo "$VERS"|sed s,'ä',ae,g)
+#			VERS=$(echo "$VERS"|sed s,'ö',oe,g)
+#			VERS=$(echo "$VERS"|sed s,'ü',ue,g)
+#			VERS=$(echo "$VERS"|sed s,"Ä",Ae,g)
+#			VERS=$(echo "$VERS"|sed s,"Ö",Oe,g)
+#			VERS=$(echo "$VERS"|sed s,"Ü",Ue,g)
+#			;;
+#	esac
 	
 #	echo "$VERS"
 #	tui-header
 	
+	#set -x
 	WIDTH=$(tput cols)
 	len=$(( 2 * ${#BORDER_LEFT} ))
 	WIDTH=$(( $WIDTH - $LEN - 4 ))
 	
 	
-	while [[ "${#VERS}" -gt $WIDTH ]]
+	while [ "${#VERS}" -gt $WIDTH ]
 	do	tui-echo "${VERS:0:$WIDTH}}"
 		VERS="${VERS:$WIDTH}"
 	done
