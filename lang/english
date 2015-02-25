@@ -1,0 +1,26 @@
+# sutra-tui, language file
+# AUTHORS applies to those writing the sutras, or interface for a specific language.
+# Append yourself once you have contributed.
+#
+#	Language : 
+#
+	AUTHORS=( "Simon A. Erat" "Sven Rüegg" )
+#
+#	Language : Helptext
+#
+	help_wrd_languages="Languages"
+	help_wrd_usage="Usage"
+	help_wrd_options="options"
+	help_wrd_arguments="arguments"
+	help_wrd_examples="Examples"
+	help_wrd_book="BOOK"
+	help_wrd_chapter="CHAPTER"
+	help_wrd_verse="VERSE"
+	help_wrd_files="Files"
+	help_str_where="Where $help_wrd_options are"
+	help_str_select="Select from"
+	help_str_this="This screen"
+#
+#	Language : Interface
+#
+	# Nothing yet.
